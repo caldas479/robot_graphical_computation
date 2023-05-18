@@ -28,14 +28,14 @@ function createCameras() {
 
     const aspectRatio = window.innerWidth/ window.innerHeight;
 
-    cameraFrontal = new THREE.OrtographicCamera(-window.innerWidth / 64, window.innerWidth / 64, 
+    cameraFrontal = new THREE.OrthographicCamera(-window.innerWidth / 64, window.innerWidth / 64, 
                                                 window.innerHeight / 64, -window.innerHeight / 64, 
                                                 1, 1000);
     cameraFrontal.position.z = 900;
     cameraFrontal.lookAt(scene.position);
 
 
-    cameraLateral = new THREE.OrtographicCamera(-window.innerWidth / 64, window.innerWidth / 64, 
+    cameraLateral = new THREE.OrthographicCamera(-window.innerWidth / 64, window.innerWidth / 64, 
                                                 window.innerHeight / 64, -window.innerHeight / 64, 
                                                 1, 1000);
     cameraLateral.position.x = 900;
