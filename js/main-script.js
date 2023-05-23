@@ -265,19 +265,17 @@ function createTrailer() {
 
 
 
-function rotateFeet(angle) {
+function rotateFeet(direction) {
     'use strict';
-  
-    feetRotation += angle; // Update the feet rotation angle
+    
+    feetRotation += direction*(Math.PI/20); // Update the feet rotation angle
   
     var leftFoot = scene.getObjectByName('leftFoot'); // Get the left foot object by name
     var rightFoot = scene.getObjectByName('rightFoot'); // Get the right foot object by name
   
-    if (leftFoot && rightFoot) {
-      leftFoot.rotation.x = feetRotation;  // Apply rotation to the left foot object
-      rightFoot.rotation.x = feetRotation; // Apply rotation to the right foot object
-    }
-  }
+    leftFoot.rotation.x = feetRotation;  // Apply rotation to the left foot object
+    rightFoot.rotation.x = feetRotation; // Apply rotation to the right foot object
+}
 
 
 
@@ -470,10 +468,14 @@ function onKeyDown(e) {
         break;
 
     case 81: // Q key
-        rotateFeet(-Math.PI / 2); // Rotate feet in the negative direction by 90 degrees
+        if (feetRotation < Math.PI /2) {
+            rotateFeet(1);  // Rotate feet in the positive direction
+        }
         break;
     case 65: // A key
-        rotateFeet(Math.PI / 2); // Rotate feet in the positive direction by 90 degrees
+        if (feetRotation > 0) {
+            rotateFeet(-1); // Rotate feet in the negative direction
+        }
         break;
     }
 }
@@ -483,5 +485,10 @@ function onKeyDown(e) {
 ///////////////////////
 function onKeyUp(e){
     'use strict';
-
+    switch (e.keyCode) {
+    case 81:
+        break;
+    case 65: 
+        break;
+    }
 }
