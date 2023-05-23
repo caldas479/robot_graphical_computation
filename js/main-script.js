@@ -48,18 +48,38 @@ function addEye(obj, side) {
     obj.add(eye);
 }
 
+function addAntenna(obj, side) {
+    'use strict';
+    var antenna = new THREE.Object3D();
+    material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
+
+    addConicPart(antenna, 1/4, 1/2, side*3/4, 14.25, 0);        //antenna
+
+    obj.add(antenna);
+}
+
 function addHead(obj) {
     'use strict';
     var head = new THREE.Object3D();
     material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
 
     addCubicPart(head, 2, 2, 1, 0, 13, 0);                //head
-    addConicPart(head, 1/4, 1/2, -3/4, 14.25, 0);         //leftAntenna
-    addConicPart(head, 1/4, 1/2, 3/4, 14.25, 0);          //rightAntenna
-    addEye(head, -1);                                     //leftEye
-    addEye(head, 1);                                      //rightEye
 
     obj.add(head);
+}
+
+function addWholeHead(obj) {
+    'use strict';
+    var wholeHead = new THREE.Object3D();
+    material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
+
+    addHead(wholeHead);                                        //head
+    addAntenna(wholeHead, -1);                                 //leftAntenna
+    addAntenna(wholeHead, 1);                                  //rightAntenna
+    addEye(wholeHead, -1);                                     //leftEye
+    addEye(wholeHead, 1);                                      //rightEye
+
+    obj.add(wholeHead);
 }
 
 function addForearm(obj, side) {
@@ -199,7 +219,7 @@ function createBody() {
     addWaist(body);                                  //waist
     addWheel(body, -2.5, 8, 0.5);                    //leftWheel
     addWheel(body, 2.5, 8, 0.5);                     //rightWheel
-    addHead(body);                                   //head
+    addWholeHead(body);                              //head
     addLeg(body,-1);                                 //leftLeg
     addLeg(body, 1);                                 //rightLeg
     addWholeArm(body,-1);                            //leftArm
