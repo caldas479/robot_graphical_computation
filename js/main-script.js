@@ -3,6 +3,7 @@
 //////////////////////
 var scene, renderer;
 
+var currentCamera;
 var cameraFrontal, cameraLateral, cameraTop;
 var cameraIsometricOrtogonal, cameraIsometricPerspective;
 
@@ -10,9 +11,10 @@ var material, mesh, geometry;
 
 var feetRotation = 0;
 
-/////////////////////
-/*  */
-/////////////////////
+
+////////////////////////
+/* CREATE OBJECT3D(S) */
+////////////////////////
 function addCubicPart(obj, dimX, dimY, dimZ, posX, posY, posZ) {
     'use strict';
     geometry = new THREE.CubeGeometry(dimX, dimY, dimZ);
@@ -324,7 +326,7 @@ function createCameras() {
 
 
     cameraIsometricOrtogonal = new THREE.OrthographicCamera(-window.innerWidth / 32, window.innerWidth / 32,
-                                                            -window.innerHeight / 32, window.innerHeight/32, 
+                                                            window.innerHeight / 32, -window.innerHeight/32, 
                                                             1, 1000);
     cameraIsometricOrtogonal.position.x = 50;
     cameraIsometricOrtogonal.position.y = 50;
@@ -338,15 +340,13 @@ function createCameras() {
     cameraIsometricPerspective.position.z = 50;
     cameraIsometricPerspective.lookAt(scene.position);
 
+    currentCamera = cameraIsometricPerspective;
 }
 
 /////////////////////
 /* CREATE LIGHT(S) */
 /////////////////////
 
-////////////////////////
-/* CREATE OBJECT3D(S) */
-////////////////////////
 
 //////////////////////
 /* CHECK COLLISIONS */
@@ -377,7 +377,7 @@ function update(){
 /////////////
 function render() {
     'use strict';
-    renderer.render(scene, cameraIsometricPerspective);
+    renderer.render(scene, currentCamera);
 }
 
 ////////////////////////////////
@@ -399,6 +399,9 @@ function init() {
 
     render();
     window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+
+    animate();
 }
 
 /////////////////////
@@ -406,6 +409,9 @@ function init() {
 /////////////////////
 function animate() {
     'use strict';
+
+    render();
+    requestAnimationFrame(animate);
 
 }
 
@@ -444,19 +450,19 @@ function onKeyDown(e) {
 
     switch (e.keyCode) {
     case 49:
-        renderer.render(scene, cameraFrontal);
+        currentCamera = cameraFrontal;
         break;
     case 50:
-        renderer.render(scene, cameraLateral);
+        currentCamera = cameraLateral;
         break;
     case 51:
-        renderer.render(scene, cameraTop);
+        currentCamera = cameraTop;
         break;
     case 52: 
-        renderer.render(scene, cameraIsometricOrtogonal);
+        currentCamera = cameraIsometricOrtogonal;
         break;
     case 53: 
-        renderer.render(scene, cameraIsometricPerspective);
+        currentCamera = cameraIsometricPerspective;
         break;
 
     case 54:
