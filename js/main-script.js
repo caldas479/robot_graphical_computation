@@ -10,6 +10,7 @@ var cameraIsometricOrtogonal, cameraIsometricPerspective;
 var material, mesh, geometry;
 
 var feetRotation = 0;
+var leftFootPivot, rightFootPivot;
 
 
 ////////////////////////
@@ -158,13 +159,30 @@ function addWheel(obj, x, y, z) {
 
 function addFoot(obj, side) {
     'use strict';
-    var foot = new THREE.Object3D();
+    
     material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
-
-    addCubicPart(foot, 3, 1, 1, side*2, 1/2, 1.5);       //foot
-    foot.name = side > 0 ? 'rightFoot' : 'leftFoot';
-
-    obj.add(foot);
+    geometry = new THREE.CubeGeometry(3, 1, 1);
+    mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+    
+    if(side > 0){
+        leftFootPivot = new THREE.Group();
+        leftFootPivot.add(mesh);
+        scene.add(leftFootPivot);
+        mesh.position.set(0,0,-1);       
+        leftFootPivot.position.set(side*2, 1/2, 0.5);
+        obj.add(leftFootPivot);
+        mesh.position.set(0,0,1); 
+    }
+    else{
+        rightFootPivot = new THREE.Group();
+        rightFootPivot.add(mesh);
+        scene.add(rightFootPivot);
+        mesh.position.set(0,0,-1);    
+        rightFootPivot.position.set(-2, 1/2, 0.5);
+        obj.add(rightFootPivot);
+        mesh.position.set(0,0,1); 
+    }
 }
 
 function addLeg(obj, side) {
@@ -272,11 +290,8 @@ function rotateFeet(direction) {
     
     feetRotation += direction*(Math.PI/20); // Update the feet rotation angle
   
-    var leftFoot = scene.getObjectByName('leftFoot'); // Get the left foot object by name
-    var rightFoot = scene.getObjectByName('rightFoot'); // Get the right foot object by name
-  
-    leftFoot.rotation.x = feetRotation;  // Apply rotation to the left foot object
-    rightFoot.rotation.x = feetRotation; // Apply rotation to the right foot object
+    leftFootPivot.rotation.x = feetRotation;  // Apply rotation to the left foot object
+    rightFootPivot.rotation.x = feetRotation; // Apply rotation to the right foot object
 }
 
 
