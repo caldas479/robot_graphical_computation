@@ -14,7 +14,7 @@ var leftFootPivot, rightFootPivot, leftLegPivot, rightLegPivot, headPivot;
 
 var armMedialMov = 0, armLateralMov = 0;
 
-var q = 0, w = 0, e = 0, r = 0, a = 0, s = 0, d = 0, f = 0;
+var qkey = 0, wkey = 0, ekey = 0, rkey = 0, akey = 0, skey = 0, dkey = 0, fkey = 0;
 
 ////////////////////////
 /* CREATE OBJECT3D(S) */
@@ -342,7 +342,7 @@ function rotateLegs(direction) {
 function rotateHead(direction) {
     'use strict';
     
-    headRotation += direction*(Math.PI/100); // Update the head rotation angle
+    headRotation += direction*(Math.PI/50); // Update the head rotation angle
   
     headPivot.rotation.x = headRotation;  // Apply rotation to the head object
 }
@@ -351,27 +351,27 @@ function transladeArms(obj1, obj2, direction) {
     'use strict';
     if (direction == 1) {
         if (armMedialMov < 2) {
-            armMedialMov += 0.4
-            obj1.position.z -= 0.4;
-            obj2.position.z -= 0.4;
+            armMedialMov += 0.2
+            obj1.position.z -= 0.2;
+            obj2.position.z -= 0.2;
         }
         else if (armLateralMov < 1) {
-            armLateralMov += 0.2
-            obj1.position.x += 0.2;
-            obj2.position.x -= 0.2;
+            armLateralMov += 0.1
+            obj1.position.x += 0.1;
+            obj2.position.x -= 0.1;
         }
     } 
     else {
 
         if (armLateralMov > 0) {
-            armLateralMov -= 0.2
-            obj1.position.x -= 0.2;
-            obj2.position.x += 0.2;
+            armLateralMov -= 0.1
+            obj1.position.x -= 0.1;
+            obj2.position.x += 0.1;
         }
         else if (armMedialMov > 0) {
-            armMedialMov -= 0.4
-            obj1.position.z += 0.4;
-            obj2.position.z += 0.4;
+            armMedialMov -= 0.2
+            obj1.position.z += 0.2;
+            obj2.position.z += 0.2;
         }
     } 
 }
@@ -467,22 +467,28 @@ function handleCollisions(){
 ////////////
 function update(){
     'use strict';
-    if(q && feetRotation < Math.PI/2) {
+    if(qkey && feetRotation < Math.PI/2) {
         rotateFeet(1);  // Rotate feet in the positive direction
     }
-    if(a && feetRotation > 0) {
+    if(akey && feetRotation > 0) {
         rotateFeet(-1);  // Rotate feet in the negative direction
     }
-    if (w && legsRotation < Math.PI/2) {
+    if (wkey && legsRotation < Math.PI/2) {
         rotateLegs(1);  // Rotate legs in the positive direction
     }
-    if (s && legsRotation > 0) {
+    if (skey && legsRotation > 0) {
         rotateLegs(-1); // Rotate legs in the negative direction
     }
-    if (r && headRotation > -Math.PI) {
+    if (ekey) {
+        transladeArms(scene.getObjectByName("leftArm"), scene.getObjectByName("rightArm"), 1);  // Translade arms to the closed position
+    }
+    if (dkey) {
+        transladeArms(scene.getObjectByName("leftArm"), scene.getObjectByName("rightArm"), -1); // Translade arms to the opened position
+    }
+    if (rkey && headRotation > -Math.PI) {
         rotateHead(-1);  // Rotate head in the negative direction
     }
-    if (f && headRotation < 0) {
+    if (fkey && headRotation < 0) {
         rotateHead(1); // Rotate head in the positive direction
     }
 }
@@ -591,38 +597,38 @@ function onKeyDown(e) {
 
     case 81:  // Q key
     case 113: // q key
-        q = 1;
+        qkey = 1;
         break;
     case 65:  // A key
     case 97:  // a key
-        a = 1;
+        akey = 1;
         break;
 
     case 87:  // W key
     case 119: // w key
-        w = 1;
+        wkey = 1;
         break;
     case 83:  // S key
     case 115: // s key
-        s = 1;
+        skey = 1;
         break;
 
     case 69:  // E key
     case 101: // e key
-        transladeArms(scene.getObjectByName("leftArm"), scene.getObjectByName("rightArm"), 1);
+        ekey = 1;
         break;
     case 68:  // D key
     case 100: // d key
-        transladeArms(scene.getObjectByName("leftArm"), scene.getObjectByName("rightArm"), -1);
+        dkey = 1;
         break;
 
     case 82:  // R key
     case 114: // r key
-        r = 1;
+        rkey = 1;
         break;
     case 70:  // F key
     case 102: // f key
-        f = 1;
+        fkey = 1;
         break;
 }
 }
@@ -635,36 +641,38 @@ function onKeyUp(e){
     switch (e.keyCode) {
     case 81:
     case 113:
-        q = 0;
+        qkey = 0;
         break;
     case 65:
     case 97:
-        a = 0;
+        akey = 0;
         break;
 
     case 87:
     case 119:
-        w = 0;
+        wkey = 0;
         break;
     case 83:
     case 115:
-        s = 0;
+        skey = 0;
         break;
 
     case 69:
     case 101:
+        ekey = 0;
         break;
     case 68:
     case 100:
+        dkey = 0;
         break;
 
     case 82:
     case 114:
-        r = 0;
+        rkey = 0;
         break;
     case 70:
     case 102:
-        f = 0;
+        fkey = 0;
         break;
     }
 }
