@@ -9,9 +9,8 @@ var cameraIsometricOrtogonal, cameraIsometricPerspective;
 
 var material, mesh, geometry;
 
-var feetRotation = 0, legsRotation = 0;
-var leftFootPivot, rightFootPivot;
-var leftLegPivot, rightLegPivot;
+var feetRotation = 0, legsRotation = 0, headRotation = 0;
+var leftFootPivot, rightFootPivot, leftLegPivot, rightLegPivot, headPivot;
 
 
 ////////////////////////
@@ -67,7 +66,11 @@ function addHead(group) {
     var head = new THREE.Object3D();
     material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
 
-    addCubicPart(head, 2, 2, 1, 0, 13, 0);                //head
+    addCubicPart(head, 2, 2, 1, 0, 13, 0);           //head
+    addAntenna(head, -1);                            //leftAntenna
+    addAntenna(head, 1);                             //rightAntenna
+    addEye(head, -1);                                //leftEye
+    addEye(head, 1);                                 //rightEye
 
     group.add(head);
 }
@@ -77,13 +80,15 @@ function addWholeHead(group) {
     var wholeHead = new THREE.Group();
     material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
 
-    addHead(wholeHead);                                        //head
-    addAntenna(wholeHead, -1);                                 //leftAntenna
-    addAntenna(wholeHead, 1);                                  //rightAntenna
-    addEye(wholeHead, -1);                                     //leftEye
-    addEye(wholeHead, 1);                                      //rightEye
+    addHead(wholeHead);                        //head
 
-    group.add(wholeHead);
+    headPivot = new THREE.Group();
+    headPivot.add(wholeHead);
+    scene.add(headPivot);
+    wholeHead.position.set(0,12,0);       
+    headPivot.position.set(0, 12, 0);
+    group.add(headPivot);
+    wholeHead.position.set(0,-12,0);
 }
 
 function addForearm(group, side) {
@@ -91,7 +96,7 @@ function addForearm(group, side) {
     var forearm = new THREE.Object3D();
     material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
 
-    addCubicPart(forearm, 1, 2, 1, side*3.5, 7, 0);             //forearm
+    addCubicPart(forearm, 1, 1, 2, side*3.5, 8.5, 1.5);             //forearm
 
     group.add(forearm);
 }
@@ -324,11 +329,28 @@ function rotateFeet(direction) {
 function rotateLegs(direction) {
     'use strict';
     
-    legsRotation += direction*(Math.PI/20); // Update the feet rotation angle
+    legsRotation += direction*(Math.PI/20); // Update the legs rotation angle
   
-    leftLegPivot.rotation.x = legsRotation;  // Apply rotation to the left foot object
-    rightLegPivot.rotation.x = legsRotation; // Apply rotation to the right foot object
+    leftLegPivot.rotation.x = legsRotation;  // Apply rotation to the left leg object
+    rightLegPivot.rotation.x = legsRotation; // Apply rotation to the right leg object
 }
+
+function rotateHead(direction) {
+    'use strict';
+    
+    headRotation += direction*(Math.PI/20); // Update the head rotation angle
+  
+    headPivot.rotation.x = headRotation;  // Apply rotation to the head object
+}
+/*
+function transladeArm(side, ) {
+    'use strict';
+    
+    headRotation += direction*(Math.PI/20); // Update the head rotation angle
+  
+    headPivot.rotation.x = headRotation;  // Apply rotation to the head object
+}
+*/
 
 
 
@@ -549,7 +571,20 @@ function onKeyDown(e) {
             rotateLegs(-1); // Rotate legs in the negative direction
         }
         break;
-    }
+
+    case 82:  // R key
+    case 114: // r key
+        if (headRotation > -Math.PI) {
+            rotateHead(-1);  // Rotate head in the negative direction
+        }
+        break;
+    case 70:  // F key
+    case 102: // f key
+        if (headRotation < 0) {
+            rotateHead(1); // Rotate head in the positive direction
+        }
+        break;
+}
 }
 
 ///////////////////////
@@ -570,6 +605,13 @@ function onKeyUp(e){
         break;
     case 83:
     case 115:
+        break;
+
+    case 82:
+    case 114:
+        break;
+    case 70:
+    case 102:
         break;
     }
 }
