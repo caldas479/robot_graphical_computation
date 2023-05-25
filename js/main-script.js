@@ -38,7 +38,7 @@ function addConicPart(obj, rad, height, posX, posY, posZ) {
 
 function addCylindricalPart(obj, radTop, radBottom, height, posX, posY, posZ) {
     'use strict';
-    geometry = new THREE.CylinderGeometry(radTop, radBottom, height);
+    geometry = new THREE.CylinderGeometry(radTop, radBottom, height,32);
     mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(posX, posY, posZ);
     mesh.rotateZ(Math.PI / 2);
@@ -300,12 +300,12 @@ function addBox(group) {
     var box = new THREE.Group();
     material = new THREE.MeshBasicMaterial({ color: 0xafafaf, wireframe: true });
 
-    addCubicPart(box, 6, 5, 20, 8, 4.5, 0);                //box
+    addCubicPart(box, 7, 6, 20, 8, 4.5, 0);                //box
     addCouplingGear(box);                                  //couplingGear
-    addWheel(box, 5.5, 1, -4.5);                           //frontLeftWheel
-    addWheel(box, 5.5, 1, -6.5);                           //backLeftWheel
-    addWheel(box, 10.5, 1, -4.5);                          //frontRightWheel
-    addWheel(box, 10.5, 1, -6.5);                          //backRightWheel
+    addWheel(box, 5, 1, -4.5);                           //frontLeftWheel
+    addWheel(box, 5, 1, -6.5);                           //backLeftWheel
+    addWheel(box, 11, 1, -4.5);                          //frontRightWheel
+    addWheel(box, 11, 1, -6.5);                          //backRightWheel
 
     group.add(box);
 }
