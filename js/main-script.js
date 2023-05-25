@@ -17,6 +17,11 @@ var armMedialMov = 0, armLateralMov = 0;
 var qkey = 0, wkey = 0, ekey = 0, rkey = 0, akey = 0, skey = 0, dkey = 0, fkey = 0;
 var upkey = 0, downkey = 0, leftkey = 0, rightkey = 0;
 
+var trailer;
+var trailerBB, truckBB;
+var truckColision = 0;
+
+
 ////////////////////////
 /* CREATE OBJECT3D(S) */
 ////////////////////////
@@ -275,6 +280,9 @@ function createRobot() {
     var robot = new THREE.Group();
     material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
 
+    // Boundary Box for  colision
+    truckBB = new THREE.Box3(new THREE.Vector3(-3, 6, -9.55),new THREE.Vector3(3, 13.5, 1.84));
+
     addBody(robot);                                   //body
     addWholeHead(robot);                              //head
     addLeg(robot,-1);                                 //leftLeg
@@ -312,10 +320,14 @@ function addBox(group) {
 
 function createTrailer() {
     'use strict';
-    var trailer = new THREE.Group();
+    trailer = new THREE.Group();
     material = new THREE.MeshBasicMaterial({ color: 0xafafaf, wireframe: true });
 
     addBox(trailer);                                           //box
+
+    // Boundary Box that moves with trailer
+    trailerBB = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+    trailerBB.setFromObject(trailer);
 
     trailer.name = "trailer";
     trailer.position.set(-8,6,-20);
@@ -408,12 +420,14 @@ function createScene(){
     scene = new THREE.Scene();
 
     scene.background = new THREE.Color(0xffffff);
+
     // x is red, y is green and z is blue
     scene.add(new THREE.AxisHelper(10));
 
     createRobot();
     createTrailer();
 }
+
 
 //////////////////////
 /* CREATE CAMERA(S) */
@@ -462,16 +476,20 @@ function createCameras() {
     currentCamera = cameraIsometricPerspective;
 }
 
-/////////////////////
-/* CREATE LIGHT(S) */
-/////////////////////
-
-
 //////////////////////
 /* CHECK COLLISIONS */
 //////////////////////
 function checkCollisions(){
     'use strict';
+
+    // Check if robot is in truck mode
+    if(feetRotation >= Math.PI/2 && legsRotation >= Math.PI/2 && 
+        headRotation <= -Math.PI && armLateralMov >= 1 && trailerBB.intersectsBox(truckBB)){
+                truckColision = 1;
+        }
+    else {
+        truckColision = 0;
+    }
 
 }
 
@@ -481,6 +499,10 @@ function checkCollisions(){
 function handleCollisions(){
     'use strict';
 
+    if(truckColision) {
+        trailer.position.set(-8,6,-14);
+    }
+
 }
 
 ////////////
@@ -488,6 +510,10 @@ function handleCollisions(){
 ////////////
 function update(){
     'use strict';
+    
+    // Update trailerBoundingBox position
+    trailerBB.setFromObject(trailer);
+
     if(qkey && feetRotation < Math.PI/2) {
         rotateFeet(1);  // Rotate feet in the positive direction
     }
@@ -512,18 +538,21 @@ function update(){
     if (fkey && headRotation < 0) {
         rotateHead(1); // Rotate head in the positive direction
     }
-    if (leftkey) {
-        moveTrailer('-x'); // Move trailer in negative x
+    if(!truckColision){
+        if (leftkey) {
+            moveTrailer('-x'); // Move trailer in negative x
+        }
+        if (rightkey) {
+            moveTrailer('+x'); // Move trailer in positive x
+        }
+        if (upkey) {
+            moveTrailer('+z'); // Move trailer in positive z
+        }
+        if (downkey) {
+            moveTrailer('-z'); // Move trailer in negative z
+        }
     }
-    if (rightkey) {
-        moveTrailer('+x'); // Move trailer in positive x
-    }
-    if (upkey) {
-        moveTrailer('+z'); // Move trailer in positive z
-    }
-    if (downkey) {
-        moveTrailer('-z'); // Move trailer in negative z
-    }
+    
 }
 
 /////////////
@@ -566,6 +595,9 @@ function animate() {
     if(clock.getDelta() >= 1/90){
         update();
     }
+    
+    checkCollisions();
+    handleCollisions();
     render();
     requestAnimationFrame(animate);
 }
