@@ -12,6 +12,7 @@ var material, mesh, geometry;
 var feetRotation = 0, legsRotation = 0, headRotation = 0;
 var leftFootPivot, rightFootPivot, leftLegPivot, rightLegPivot, headPivot;
 
+var q = 0, w = 0, e = 0, r = 0, a = 0, s = 0, d = 0, f = 0;
 
 ////////////////////////
 /* CREATE OBJECT3D(S) */
@@ -320,7 +321,7 @@ function createTrailer() {
 function rotateFeet(direction) {
     'use strict';
     
-    feetRotation += direction*(Math.PI/20); // Update the feet rotation angle
+    feetRotation += direction*(Math.PI/100); // Update the feet rotation angle
   
     leftFootPivot.rotation.x = feetRotation;  // Apply rotation to the left foot object
     rightFootPivot.rotation.x = feetRotation; // Apply rotation to the right foot object
@@ -329,7 +330,7 @@ function rotateFeet(direction) {
 function rotateLegs(direction) {
     'use strict';
     
-    legsRotation += direction*(Math.PI/20); // Update the legs rotation angle
+    legsRotation += direction*(Math.PI/100); // Update the legs rotation angle
   
     leftLegPivot.rotation.x = legsRotation;  // Apply rotation to the left leg object
     rightLegPivot.rotation.x = legsRotation; // Apply rotation to the right leg object
@@ -338,7 +339,7 @@ function rotateLegs(direction) {
 function rotateHead(direction) {
     'use strict';
     
-    headRotation += direction*(Math.PI/20); // Update the head rotation angle
+    headRotation += direction*(Math.PI/100); // Update the head rotation angle
   
     headPivot.rotation.x = headRotation;  // Apply rotation to the head object
 }
@@ -442,7 +443,24 @@ function handleCollisions(){
 ////////////
 function update(){
     'use strict';
-
+    if(q && feetRotation < Math.PI/2) {
+        rotateFeet(1);  // Rotate feet in the positive direction
+    }
+    if(a && feetRotation > 0) {
+        rotateFeet(-1);  // Rotate feet in the negative direction
+    }
+    if (w && legsRotation < Math.PI/2) {
+        rotateLegs(1);  // Rotate legs in the positive direction
+    }
+    if (s && legsRotation > 0) {
+        rotateLegs(-1); // Rotate legs in the negative direction
+    }
+    if (r && headRotation > -Math.PI) {
+        rotateHead(-1);  // Rotate head in the negative direction
+    }
+    if (f && headRotation < 0) {
+        rotateHead(1); // Rotate head in the positive direction
+    }
 }
 
 /////////////
@@ -482,7 +500,7 @@ function init() {
 /////////////////////
 function animate() {
     'use strict';
-
+    update();
     render();
     requestAnimationFrame(animate);
 
@@ -548,41 +566,29 @@ function onKeyDown(e) {
 
     case 81:  // Q key
     case 113: // q key
-        if (feetRotation < Math.PI/2) {
-            rotateFeet(1);  // Rotate feet in the positive direction
-        }
+        q = 1;
         break;
     case 65:  // A key
     case 97:  // a key
-        if (feetRotation > 0) {
-            rotateFeet(-1); // Rotate feet in the negative direction
-        }
+        a = 1;
         break;
 
     case 87:  // W key
     case 119: // w key
-        if (legsRotation < Math.PI/2) {
-            rotateLegs(1);  // Rotate legs in the positive direction
-        }
+        w = 1;
         break;
     case 83:  // S key
     case 115: // s key
-        if (legsRotation > 0) {
-            rotateLegs(-1); // Rotate legs in the negative direction
-        }
+        s = 1;
         break;
 
     case 82:  // R key
     case 114: // r key
-        if (headRotation > -Math.PI) {
-            rotateHead(-1);  // Rotate head in the negative direction
-        }
+        r = 1;
         break;
     case 70:  // F key
     case 102: // f key
-        if (headRotation < 0) {
-            rotateHead(1); // Rotate head in the positive direction
-        }
+        f = 1;
         break;
 }
 }
@@ -595,23 +601,29 @@ function onKeyUp(e){
     switch (e.keyCode) {
     case 81:
     case 113:
+        q = 0;
         break;
     case 65:
     case 97:
+        a = 0;
         break;
 
     case 87:
     case 119:
+        w = 0;
         break;
     case 83:
     case 115:
+        s = 0;
         break;
 
     case 82:
     case 114:
+        r = 0;
         break;
     case 70:
     case 102:
+        f = 0;
         break;
     }
 }
