@@ -280,7 +280,7 @@ function addBox(group) {
     var box = new THREE.Object3D();
     material = new THREE.MeshBasicMaterial({ color: 0xafafaf, wireframe: true });
 
-    addCubicPart(box, 6, 5, 11, 8+10, 4.5-20, 0);             //box
+    addCubicPart(box, 6, 5, 20, 8, 4.5, 0);             //box
 
     group.add(box);
 }
@@ -290,7 +290,7 @@ function addCouplingGear(group) {
     var couplingGear = new THREE.Object3D();
     material = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
 
-    addCubicPart(couplingGear, 1/2, 1/2, 1/2, 8+10, 1.75-20, 4.5);     //couplingGear
+    addCubicPart(couplingGear, 1/2, 1/2, 1/2, 8, 1.75, 10);     //couplingGear
 
     group.add(couplingGear);
 }
@@ -302,10 +302,12 @@ function createTrailer() {
 
     addBox(trailer);                                           //box
     addCouplingGear(trailer);                                  //couplingGear
-    addWheel(trailer, 5.5+10, 1-20, -2.5);                        //frontLeftWheel
-    addWheel(trailer, 5.5+10, 1-20, -4.5);                        //backLeftWheel
-    addWheel(trailer, 10.5+10, 1-20, -2.5);                       //frontRightWheel
-    addWheel(trailer, 10.5+10, 1-20, -4.5);                       //backRightWheel
+    addWheel(trailer, 5.5, 1, -4.5);                           //frontLeftWheel
+    addWheel(trailer, 5.5, 1, -6.5);                           //backLeftWheel
+    addWheel(trailer, 10.5, 1, -4.5);                          //frontRightWheel
+    addWheel(trailer, 10.5, 1, -6.5);                          //backRightWheel
+
+    trailer.position.set(0,6,-12);
 
     scene.add(trailer);
 }
