@@ -12,6 +12,8 @@ var material, mesh, geometry;
 var feetRotation = 0, legsRotation = 0, headRotation = 0;
 var leftFootPivot, rightFootPivot, leftLegPivot, rightLegPivot, headPivot;
 
+var armMedialMov = 0, armLateralMov = 0;
+
 var q = 0, w = 0, e = 0, r = 0, a = 0, s = 0, d = 0, f = 0;
 
 ////////////////////////
@@ -97,7 +99,7 @@ function addForearm(group, side) {
     var forearm = new THREE.Object3D();
     material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
 
-    addCubicPart(forearm, 1, 1, 2, side*3.5, 8.5, 1.5);             //forearm
+    addCubicPart(forearm, 1, 1, 3, side*3.5, 8.5, 2);             //forearm
 
     group.add(forearm);
 }
@@ -105,7 +107,7 @@ function addForearm(group, side) {
 function addExhaust(group, side) {
     'use strict';
     var exhaust = new THREE.Object3D();
-    material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+    material = new THREE.MeshBasicMaterial({ color: 0xafafaf, wireframe: true });
 
     addCubicPart(exhaust, 1/2, 3, 1/2, side*4.25, 12.5, -1/2);  //exhaust
 
@@ -130,6 +132,7 @@ function addWholeArm(group, side) {
     material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
 
     addArm(wholeArm, side);                                      //arm
+    wholeArm.name = side > 0 ? "rightArm" : "leftArm";
 
     group.add(wholeArm);
 }
@@ -343,15 +346,36 @@ function rotateHead(direction) {
   
     headPivot.rotation.x = headRotation;  // Apply rotation to the head object
 }
-/*
-function transladeArm(side, ) {
+
+function transladeArms(obj1, obj2, direction) {
     'use strict';
-    
-    headRotation += direction*(Math.PI/20); // Update the head rotation angle
-  
-    headPivot.rotation.x = headRotation;  // Apply rotation to the head object
+    if (direction == 1) {
+        if (armMedialMov < 2) {
+            armMedialMov += 0.4
+            obj1.position.z -= 0.4;
+            obj2.position.z -= 0.4;
+        }
+        else if (armLateralMov < 1) {
+            armLateralMov += 0.2
+            obj1.position.x += 0.2;
+            obj2.position.x -= 0.2;
+        }
+    } 
+    else {
+
+        if (armLateralMov > 0) {
+            armLateralMov -= 0.2
+            obj1.position.x -= 0.2;
+            obj2.position.x += 0.2;
+        }
+        else if (armMedialMov > 0) {
+            armMedialMov -= 0.4
+            obj1.position.z += 0.4;
+            obj2.position.z += 0.4;
+        }
+    } 
 }
-*/
+
 
 
 
@@ -505,7 +529,6 @@ function animate() {
     }
     render();
     requestAnimationFrame(animate);
-
 }
 
 ////////////////////////////
@@ -584,6 +607,15 @@ function onKeyDown(e) {
         s = 1;
         break;
 
+    case 69:  // E key
+    case 101: // e key
+        transladeArms(scene.getObjectByName("leftArm"), scene.getObjectByName("rightArm"), 1);
+        break;
+    case 68:  // D key
+    case 100: // d key
+        transladeArms(scene.getObjectByName("leftArm"), scene.getObjectByName("rightArm"), -1);
+        break;
+
     case 82:  // R key
     case 114: // r key
         r = 1;
@@ -617,6 +649,13 @@ function onKeyUp(e){
     case 83:
     case 115:
         s = 0;
+        break;
+
+    case 69:
+    case 101:
+        break;
+    case 68:
+    case 100:
         break;
 
     case 82:
