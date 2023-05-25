@@ -9,8 +9,9 @@ var cameraIsometricOrtogonal, cameraIsometricPerspective;
 
 var material, mesh, geometry;
 
-var feetRotation = 0;
+var feetRotation = 0, legsRotation = 0;
 var leftFootPivot, rightFootPivot;
+var leftLegPivot, rightLegPivot;
 
 
 ////////////////////////
@@ -41,39 +42,39 @@ function addCylindricalPart(obj, radTop, radBottom, height, posX, posY, posZ) {
     obj.add(mesh);
 }
 
-function addEye(obj, side) {
+function addEye(group, side) {
     'use strict';
     var eye = new THREE.Object3D();
     material = new THREE.MeshBasicMaterial({ color: 0xafafaf, wireframe: true });
 
     addCubicPart(eye, 1/2, 1/2, 1/8, side*1/3, 13.25, 1/2);    //eye
 
-    obj.add(eye);
+    group.add(eye);
 }
 
-function addAntenna(obj, side) {
+function addAntenna(group, side) {
     'use strict';
     var antenna = new THREE.Object3D();
     material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
 
     addConicPart(antenna, 1/4, 1/2, side*3/4, 14.25, 0);        //antenna
 
-    obj.add(antenna);
+    group.add(antenna);
 }
 
-function addHead(obj) {
+function addHead(group) {
     'use strict';
     var head = new THREE.Object3D();
     material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
 
     addCubicPart(head, 2, 2, 1, 0, 13, 0);                //head
 
-    obj.add(head);
+    group.add(head);
 }
 
-function addWholeHead(obj) {
+function addWholeHead(group) {
     'use strict';
-    var wholeHead = new THREE.Object3D();
+    var wholeHead = new THREE.Group();
     material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
 
     addHead(wholeHead);                                        //head
@@ -82,190 +83,216 @@ function addWholeHead(obj) {
     addEye(wholeHead, -1);                                     //leftEye
     addEye(wholeHead, 1);                                      //rightEye
 
-    obj.add(wholeHead);
+    group.add(wholeHead);
 }
 
-function addForearm(obj, side) {
+function addForearm(group, side) {
     'use strict';
     var forearm = new THREE.Object3D();
     material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
 
     addCubicPart(forearm, 1, 2, 1, side*3.5, 7, 0);             //forearm
 
-    obj.add(forearm);
+    group.add(forearm);
 }
 
-function addArm(obj, side) {
-    'use strict';
-    var arm = new THREE.Object3D();
-    material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
-
-    addCubicPart(arm, 1, 4, 1, side*3.5, 10, 0);             //arm
-
-    obj.add(arm);
-}
-
-function addExhaust(obj, side) {
+function addExhaust(group, side) {
     'use strict';
     var exhaust = new THREE.Object3D();
     material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
 
     addCubicPart(exhaust, 1/2, 3, 1/2, side*4.25, 12.5, -1/2);  //exhaust
 
-    obj.add(exhaust);
+    group.add(exhaust);
 }
 
-function addWholeArm(obj, side) {
+function addArm(group, side) {
     'use strict';
-    var wholeArm = new THREE.Object3D();
+    var arm = new THREE.Group();
+    material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+
+    addCubicPart(arm, 1, 4, 1, side*3.5, 10, 0);             //arm
+    addExhaust(arm, side);                                   //exhaust
+    addForearm(arm, side);                                   //forearm
+
+    group.add(arm);
+}
+
+function addWholeArm(group, side) {
+    'use strict';
+    var wholeArm = new THREE.Group();
     material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
 
     addArm(wholeArm, side);                                      //arm
-    addExhaust(wholeArm, side);                                  //exhaust
-    addForearm(wholeArm, side);                                  //forearm
 
-    obj.add(wholeArm);
+    group.add(wholeArm);
 }
 
-function addThigh(obj, side) {
-    'use strict';
-    var thigh = new THREE.Object3D();
-    material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
-
-    addCubicPart(thigh, 1, 3, 1, side*1.5, 5.5, 0);       //thigh
-
-    obj.add(thigh);
-}
-
-function addLowLeg(obj, side) {
-    'use strict';
-    var lowLeg = new THREE.Object3D();
-    material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
-
-    addCubicPart(lowLeg, 2, 4, 2, side*1.5, 2, 0);       //lowerLeg
-
-    obj.add(lowLeg);
-}
-
-function addWheel(obj, x, y, z) {
+function addWheel(group, x, y, z) {
     'use strict';
     var wheel = new THREE.Object3D();
     material = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
 
     addCylindricalPart(wheel, 1, 1, 1, x, y, z);       //wheel
 
-    obj.add(wheel);
+    group.add(wheel);
 }
 
-function addFoot(obj, side) {
+function addFoot(group, side) {
     'use strict';
-    
-    material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
-    geometry = new THREE.CubeGeometry(3, 1, 1);
-    mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh);
+    var foot = new THREE.Object3D();
+    material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true }); 
+
+    addCubicPart(foot, 3, 1, 1, 0, 0, 0);  //foot
     
     if(side > 0){
         leftFootPivot = new THREE.Group();
-        leftFootPivot.add(mesh);
+        leftFootPivot.add(foot);
         scene.add(leftFootPivot);
-        mesh.position.set(0,0,-1);       
-        leftFootPivot.position.set(side*2, 1/2, 0.5);
-        obj.add(leftFootPivot);
-        mesh.position.set(0,0,1); 
+        foot.position.set(0,0,-1);       
+        leftFootPivot.position.set(2, 1/2, 0.5);
+        group.add(leftFootPivot);
+        foot.position.set(0,0,1);
     }
     else{
         rightFootPivot = new THREE.Group();
-        rightFootPivot.add(mesh);
+        rightFootPivot.add(foot);
         scene.add(rightFootPivot);
-        mesh.position.set(0,0,-1);    
+        foot.position.set(0,0,-1);    
         rightFootPivot.position.set(-2, 1/2, 0.5);
-        obj.add(rightFootPivot);
-        mesh.position.set(0,0,1); 
+        group.add(rightFootPivot);
+        foot.position.set(0,0,1);
     }
 }
 
-function addLeg(obj, side) {
+function addLowLeg(group, side) {
     'use strict';
-    var leg = new THREE.Object3D();
+    var lowLeg = new THREE.Group();
+    material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
+
+    addCubicPart(lowLeg, 2, 4, 2, side*1.5, 2, 0);       //lowerLeg
+    addWheel(lowLeg, side*3, 3, 0.5);                      //topWheel
+    addWheel(lowLeg, side*3, 1, 0.5);                      //bottomWheel
+    addFoot(lowLeg, side);                               //foot
+
+    group.add(lowLeg);
+}
+
+function addThigh(group, side) {
+    'use strict';
+    var thigh = new THREE.Group();
+    material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
+
+    addCubicPart(thigh, 1, 3, 1, side*1.5, 5.5, 0);             //thigh
+    addLowLeg(thigh, side);                                     //lowerLeg
+
+    group.add(thigh);
+}
+
+function addLeg(group, side) {
+    'use strict';
+    var leg = new THREE.Group();
     material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
 
     addThigh(leg, side);                                //thigh
-    addLowLeg(leg, side);                               //lowerLeg
-    addWheel(leg, side*3, 3, 0);                        //topWheel
-    addWheel(leg, side*3, 1, 0);                        //bottomWheel
-    addFoot(leg, side);                                 //foot
 
-    obj.add(leg);
+    if(side > 0){
+        leftLegPivot = new THREE.Group();
+        leftLegPivot.add(leg);
+        scene.add(leftLegPivot);
+        leg.position.set(1.5,8,-0.5);       
+        leftLegPivot.position.set(1.5, 8, -0.5);
+        group.add(leftLegPivot);
+        leg.position.set(-1.5,-8,0.5);
+    }
+    else{
+        rightLegPivot = new THREE.Group();
+        rightLegPivot.add(leg);
+        scene.add(rightLegPivot);
+        leg.position.set(1.5,8,-0.5);    
+        rightLegPivot.position.set(-1.5, 8, -0.5);
+        group.add(rightLegPivot);
+        leg.position.set(1.5,-8,0.5);
+    }
 }
 
-function addTorso(obj) {
+function addWaist(group) {
     'use strict';
-    var torso = new THREE.Object3D();
-    material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
-
-    addCubicPart(torso, 6, 2, 3, 0, 11, 0);            //torso
-
-    obj.add(torso);
-}
-
-function addAbdomen(obj) {
-    'use strict';
-    var abdomen = new THREE.Object3D();
-    material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
-
-    addCubicPart(abdomen, 4, 1, 3, 0, 9.5, 0);            //abdomen
-
-    obj.add(abdomen);
-}
-
-function addWaist(obj) {
-    'use strict';
-    var waist = new THREE.Object3D();
+    var waist = new THREE.Group();
     material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
 
     addCubicPart(waist, 4, 2, 3, 0, 8, 0);            //waist
+    addWheel(waist, -2.5, 7, 0.5);                    //leftWheel
+    addWheel(waist, 2.5, 7, 0.5);                     //rightWheel
 
-    obj.add(waist);
+    group.add(waist);
 }
 
-function createBody() {
+function addAbdomen(group) {
     'use strict';
-    var body = new THREE.Object3D();
+    var abdomen = new THREE.Group();
+    material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+
+    addCubicPart(abdomen, 4, 1, 3, 0, 9.5, 0);            //abdomen
+    addWaist(abdomen);                                    //waist
+
+    group.add(abdomen);
+}
+
+function addTorso(group) {
+    'use strict';
+    var torso = new THREE.Group();
+    material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+
+    addCubicPart(torso, 6, 2, 3, 0, 11, 0);            //torso
+    addAbdomen(torso);                                //abdomen
+
+    group.add(torso);
+}
+
+function addBody(group) {
+    'use strict';
+    var body = new THREE.Group();
     material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
 
     addTorso(body);                                  //torso
-    addAbdomen(body);                                //abdomen
-    addWaist(body);                                  //waist
-    addWheel(body, -2.5, 8, 0.5);                    //leftWheel
-    addWheel(body, 2.5, 8, 0.5);                     //rightWheel
-    addWholeHead(body);                              //head
-    addLeg(body,-1);                                 //leftLeg
-    addLeg(body, 1);                                 //rightLeg
-    addWholeArm(body,-1);                            //leftArm
-    addWholeArm(body, 1);                            //rightArm
 
-    scene.add(body);
+    group.add(body);
 }
 
-function addBox(obj) {
+function createRobot() {
+    'use strict';
+    var robot = new THREE.Group();
+    material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+
+    addBody(robot);                                   //body
+    addWholeHead(robot);                              //head
+    addLeg(robot,-1);                                 //leftLeg
+    addLeg(robot, 1);                                 //rightLeg
+    addWholeArm(robot,-1);                            //leftArm
+    addWholeArm(robot, 1);                            //rightArm
+
+    scene.add(robot);
+}
+
+function addBox(group) {
     'use strict';
     var box = new THREE.Object3D();
     material = new THREE.MeshBasicMaterial({ color: 0xafafaf, wireframe: true });
 
-    addCubicPart(box, 6, 5, 11, 8+10, 4.5, 0);             //box
+    addCubicPart(box, 6, 5, 11, 8+10, 4.5-20, 0);             //box
 
-    obj.add(box);
+    group.add(box);
 }
 
-function addCouplingGear(obj) {
+function addCouplingGear(group) {
     'use strict';
     var couplingGear = new THREE.Object3D();
     material = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
 
-    addCubicPart(couplingGear, 1/2, 1/2, 1/2, 8+10, 1.75, 4.5);     //couplingGear
+    addCubicPart(couplingGear, 1/2, 1/2, 1/2, 8+10, 1.75-20, 4.5);     //couplingGear
 
-    obj.add(couplingGear);
+    group.add(couplingGear);
 }
 
 function createTrailer() {
@@ -275,15 +302,13 @@ function createTrailer() {
 
     addBox(trailer);                                           //box
     addCouplingGear(trailer);                                  //couplingGear
-    addWheel(trailer, 5.5+10, 1, -2.5);                        //frontLeftWheel
-    addWheel(trailer, 5.5+10, 1, -4.5);                        //backLeftWheel
-    addWheel(trailer, 10.5+10, 1, -2.5);                       //frontRightWheel
-    addWheel(trailer, 10.5+10, 1, -4.5);                       //backRightWheel
+    addWheel(trailer, 5.5+10, 1-20, -2.5);                        //frontLeftWheel
+    addWheel(trailer, 5.5+10, 1-20, -4.5);                        //backLeftWheel
+    addWheel(trailer, 10.5+10, 1-20, -2.5);                       //frontRightWheel
+    addWheel(trailer, 10.5+10, 1-20, -4.5);                       //backRightWheel
 
     scene.add(trailer);
 }
-
-
 
 function rotateFeet(direction) {
     'use strict';
@@ -292,6 +317,15 @@ function rotateFeet(direction) {
   
     leftFootPivot.rotation.x = feetRotation;  // Apply rotation to the left foot object
     rightFootPivot.rotation.x = feetRotation; // Apply rotation to the right foot object
+}
+
+function rotateLegs(direction) {
+    'use strict';
+    
+    legsRotation += direction*(Math.PI/20); // Update the feet rotation angle
+  
+    leftLegPivot.rotation.x = legsRotation;  // Apply rotation to the left foot object
+    rightLegPivot.rotation.x = legsRotation; // Apply rotation to the right foot object
 }
 
 
@@ -307,7 +341,7 @@ function createScene(){
     // x is red, y is green and z is blue
     scene.add(new THREE.AxisHelper(10));
 
-    createBody();
+    createRobot();
     createTrailer();
 }
 
@@ -488,14 +522,29 @@ function onKeyDown(e) {
         });
         break;
 
-    case 81: // Q key
-        if (feetRotation < Math.PI /2) {
+    case 81:  // Q key
+    case 113: // q key
+        if (feetRotation < Math.PI/2) {
             rotateFeet(1);  // Rotate feet in the positive direction
         }
         break;
-    case 65: // A key
+    case 65:  // A key
+    case 97:  // a key
         if (feetRotation > 0) {
             rotateFeet(-1); // Rotate feet in the negative direction
+        }
+        break;
+
+    case 87:  // W key
+    case 119: // w key
+        if (legsRotation < Math.PI/2) {
+            rotateLegs(1);  // Rotate legs in the positive direction
+        }
+        break;
+    case 83:  // S key
+    case 115: // s key
+        if (legsRotation > 0) {
+            rotateLegs(-1); // Rotate legs in the negative direction
         }
         break;
     }
@@ -508,8 +557,17 @@ function onKeyUp(e){
     'use strict';
     switch (e.keyCode) {
     case 81:
+    case 113:
         break;
-    case 65: 
+    case 65:
+    case 97:
+        break;
+
+    case 87:
+    case 119:
+        break;
+    case 83:
+    case 115:
         break;
     }
 }
