@@ -15,6 +15,7 @@ var leftFootPivot, rightFootPivot, leftLegPivot, rightLegPivot, headPivot;
 var armMedialMov = 0, armLateralMov = 0;
 
 var qkey = 0, wkey = 0, ekey = 0, rkey = 0, akey = 0, skey = 0, dkey = 0, fkey = 0;
+var upkey = 0, downkey = 0, leftkey = 0, rightkey = 0;
 
 ////////////////////////
 /* CREATE OBJECT3D(S) */
@@ -284,16 +285,6 @@ function createRobot() {
     scene.add(robot);
 }
 
-function addBox(group) {
-    'use strict';
-    var box = new THREE.Object3D();
-    material = new THREE.MeshBasicMaterial({ color: 0xafafaf, wireframe: true });
-
-    addCubicPart(box, 6, 5, 20, 8, 4.5, 0);             //box
-
-    group.add(box);
-}
-
 function addCouplingGear(group) {
     'use strict';
     var couplingGear = new THREE.Object3D();
@@ -304,19 +295,30 @@ function addCouplingGear(group) {
     group.add(couplingGear);
 }
 
+function addBox(group) {
+    'use strict';
+    var box = new THREE.Group();
+    material = new THREE.MeshBasicMaterial({ color: 0xafafaf, wireframe: true });
+
+    addCubicPart(box, 6, 5, 20, 8, 4.5, 0);                //box
+    addCouplingGear(box);                                  //couplingGear
+    addWheel(box, 5.5, 1, -4.5);                           //frontLeftWheel
+    addWheel(box, 5.5, 1, -6.5);                           //backLeftWheel
+    addWheel(box, 10.5, 1, -4.5);                          //frontRightWheel
+    addWheel(box, 10.5, 1, -6.5);                          //backRightWheel
+
+    group.add(box);
+}
+
 function createTrailer() {
     'use strict';
-    var trailer = new THREE.Object3D();
+    var trailer = new THREE.Group();
     material = new THREE.MeshBasicMaterial({ color: 0xafafaf, wireframe: true });
 
     addBox(trailer);                                           //box
-    addCouplingGear(trailer);                                  //couplingGear
-    addWheel(trailer, 5.5, 1, -4.5);                           //frontLeftWheel
-    addWheel(trailer, 5.5, 1, -6.5);                           //backLeftWheel
-    addWheel(trailer, 10.5, 1, -4.5);                          //frontRightWheel
-    addWheel(trailer, 10.5, 1, -6.5);                          //backRightWheel
 
-    trailer.position.set(0,6,-12);
+    trailer.name = "trailer";
+    trailer.position.set(-8,6,-20);
 
     scene.add(trailer);
 }
@@ -347,36 +349,55 @@ function rotateHead(direction) {
     headPivot.rotation.x = headRotation;  // Apply rotation to the head object
 }
 
-function transladeArms(obj1, obj2, direction) {
+function transladeArms(direction) {
     'use strict';
+    var leftArm = scene.getObjectByName("leftArm");
+    var rightArm = scene.getObjectByName("rightArm");
+
     if (direction == 1) {
         if (armMedialMov < 2) {
             armMedialMov += 0.2
-            obj1.position.z -= 0.2;
-            obj2.position.z -= 0.2;
+            leftArm.position.z -= 0.2;
+            rightArm.position.z -= 0.2;
         }
         else if (armLateralMov < 1) {
             armLateralMov += 0.1
-            obj1.position.x += 0.1;
-            obj2.position.x -= 0.1;
+            leftArm.position.x += 0.1;
+            rightArm.position.x -= 0.1;
         }
     } 
     else {
 
         if (armLateralMov > 0) {
             armLateralMov -= 0.1
-            obj1.position.x -= 0.1;
-            obj2.position.x += 0.1;
+            leftArm.position.x -= 0.1;
+            rightArm.position.x += 0.1;
         }
         else if (armMedialMov > 0) {
             armMedialMov -= 0.2
-            obj1.position.z += 0.2;
-            obj2.position.z += 0.2;
+            leftArm.position.z += 0.2;
+            rightArm.position.z += 0.2;
         }
     } 
 }
 
+function moveTrailer(direction) {
+    'use strict';
+    var trailer = scene.getObjectByName("trailer");
 
+    if (direction == '+x') {
+        trailer.position.x += 0.2;
+    }
+    if (direction == '-x') {
+        trailer.position.x += -0.2;
+    }
+    if (direction == '+z') {
+        trailer.position.z += 0.2;
+    }
+    if (direction == '-z') {
+        trailer.position.z += -0.2;
+    }
+}
 
 
 /////////////////////
@@ -480,16 +501,28 @@ function update(){
         rotateLegs(-1); // Rotate legs in the negative direction
     }
     if (ekey) {
-        transladeArms(scene.getObjectByName("leftArm"), scene.getObjectByName("rightArm"), 1);  // Translade arms to the closed position
+        transladeArms(1);  // Translade arms to the closed position
     }
     if (dkey) {
-        transladeArms(scene.getObjectByName("leftArm"), scene.getObjectByName("rightArm"), -1); // Translade arms to the opened position
+        transladeArms(-1); // Translade arms to the opened position
     }
     if (rkey && headRotation > -Math.PI) {
         rotateHead(-1);  // Rotate head in the negative direction
     }
     if (fkey && headRotation < 0) {
         rotateHead(1); // Rotate head in the positive direction
+    }
+    if (leftkey) {
+        moveTrailer('-x'); // Move trailer in negative x
+    }
+    if (rightkey) {
+        moveTrailer('+x'); // Move trailer in positive x
+    }
+    if (upkey) {
+        moveTrailer('+z'); // Move trailer in positive z
+    }
+    if (downkey) {
+        moveTrailer('-z'); // Move trailer in negative z
     }
 }
 
@@ -571,23 +604,23 @@ function onKeyDown(e) {
     'use strict';
 
     switch (e.keyCode) {
-    case 49:
+    case 49: // 1 key
         currentCamera = cameraFrontal;
         break;
-    case 50:
+    case 50: // 2 key
         currentCamera = cameraLateral;
         break;
-    case 51:
+    case 51: // 3 key
         currentCamera = cameraTop;
         break;
-    case 52: 
+    case 52: // 4 key
         currentCamera = cameraIsometricOrtogonal;
         break;
-    case 53: 
+    case 53: // 5 key
         currentCamera = cameraIsometricPerspective;
         break;
 
-    case 54:
+    case 54: // 6 key
         scene.traverse(function (node) {
             if (node instanceof THREE.Mesh) {
                 node.material.wireframe = !node.material.wireframe;
@@ -629,6 +662,19 @@ function onKeyDown(e) {
     case 70:  // F key
     case 102: // f key
         fkey = 1;
+        break;
+
+    case 38:  // ArrowUp key
+        upkey = 1;
+        break;
+    case 40:  // ArrowDown key
+        downkey = 1;
+        break;
+    case 37:  // ArrowLeft key
+        leftkey = 1;
+        break;
+    case 39:  // ArrowRight key
+        rightkey = 1;
         break;
 }
 }
@@ -673,6 +719,19 @@ function onKeyUp(e){
     case 70:
     case 102:
         fkey = 0;
+        break;
+
+    case 38:
+        upkey = 0;
+        break;
+    case 40:
+        downkey = 0;
+        break;
+    case 37:
+        leftkey = 0;
+        break;
+    case 39:
+        rightkey = 0;
         break;
     }
 }
