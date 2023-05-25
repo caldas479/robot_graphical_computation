@@ -1,7 +1,7 @@
 //////////////////////
 /* GLOBAL VARIABLES */
 //////////////////////
-var scene, renderer;
+var scene, renderer,clock;
 
 var currentCamera;
 var cameraFrontal, cameraLateral, cameraTop;
@@ -476,7 +476,7 @@ function render() {
 ////////////////////////////////
 function init() {
     'use strict';
-
+    clock = new THREE.Clock(true);
     renderer = new THREE.WebGLRenderer({
         antialias: true
     });
@@ -500,7 +500,9 @@ function init() {
 /////////////////////
 function animate() {
     'use strict';
-    update();
+    if(clock.getDelta() >= 1/90){
+        update();
+    }
     render();
     requestAnimationFrame(animate);
 
