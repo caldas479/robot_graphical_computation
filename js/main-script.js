@@ -538,20 +538,20 @@ function update(){
     if (fkey && headRotation < 0) {
         rotateHead(1); // Rotate head in the positive direction
     }
-    if(!truckColision){
-        if (leftkey) {
-            moveTrailer('-x'); // Move trailer in negative x
-        }
-        if (rightkey) {
-            moveTrailer('+x'); // Move trailer in positive x
-        }
-        if (upkey) {
-            moveTrailer('+z'); // Move trailer in positive z
-        }
-        if (downkey) {
-            moveTrailer('-z'); // Move trailer in negative z
-        }
+    
+    if (leftkey) {
+        moveTrailer('-x'); // Move trailer in negative x
     }
+    if (rightkey) {
+        moveTrailer('+x'); // Move trailer in positive x
+    }
+    if (upkey) {
+        moveTrailer('+z'); // Move trailer in positive z
+    }
+    if (downkey) {
+        moveTrailer('-z'); // Move trailer in negative z
+    }
+    
     
 }
 
