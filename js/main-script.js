@@ -3,7 +3,7 @@
 //////////////////////
 var scene, renderer,clock;
 
-var currentCamera;
+var currentCamera, nextCamera;
 var cameraFrontal, cameraLateral, cameraTop;
 var cameraIsometricOrtogonal, cameraIsometricPerspective;
 
@@ -17,10 +17,13 @@ var armMedialMov = 0, armLateralMov = 0;
 var qkey = 0, wkey = 0, ekey = 0, rkey = 0, akey = 0, skey = 0, dkey = 0, fkey = 0;
 var upkey = 0, downkey = 0, leftkey = 0, rightkey = 0;
 
-var trailer;
 var truckColision = 0;
+var trailerAnimation = 0;
 
 var truckBBMin, truckBBMax, trailerBBMin,trailerBBMax;
+
+const animationDuration = 1000; // 1 second
+const numFrames = 60; // 60 frames per second
 
 ////////////////////////
 /* CREATE OBJECT3D(S) */
@@ -321,7 +324,7 @@ function addBox(group) {
 
 function createTrailer() {
     'use strict';
-    trailer = new THREE.Group();
+    var trailer = new THREE.Group();
     material = new THREE.MeshBasicMaterial({ color: 0xafafaf, wireframe: true });
 
     addBox(trailer);                                           //box
@@ -428,7 +431,7 @@ function createScene(){
     'use strict';
     scene = new THREE.Scene();
 
-    scene.background = new THREE.Color(0xffffff);
+    scene.background = new THREE.Color(0xeeeeff);
 
     // x is red, y is green and z is blue
     scene.add(new THREE.AxisHelper(10));
@@ -483,6 +486,7 @@ function createCameras() {
     cameraIsometricPerspective.lookAt(scene.position);
 
     currentCamera = cameraIsometricPerspective;
+    nextCamera = cameraIsometricPerspective;
 }
 
 //////////////////////
@@ -515,11 +519,33 @@ function handleCollisions(){
     'use strict';
 
     if(truckColision) {
-        trailer.position.set(-8,6,-14);
+        var trailer = scene.getObjectByName("trailer");
+        const currentPosition = trailer.position;
+        const targetPosition = new THREE.Vector3(-8,6,-14);
+        const stepSize = targetPosition.clone().sub(currentPosition).divideScalar(numFrames);
+
+        let frameCount = 0;
+
+        function animateTrailer() {
+            trailerAnimation = 1;
+            trailer.position.add(stepSize);
+
+            render();
+
+            frameCount++;
+            
+            if (frameCount < numFrames) {
+                requestAnimationFrame(animateTrailer);
+            }          
+        }
+
+        animateTrailer();
+        
         // Boundary Box initial points
         trailerBBMin = new THREE.Vector3(-3.5, 6, -24);
         trailerBBMax = new THREE.Vector3(3.5, 13.5, -3.75);
     }
+    trailerAnimation = 0;
 
 }
 
@@ -554,19 +580,21 @@ function update(){
         rotateHead(1); // Rotate head in the positive direction
     }
     
-    if (leftkey) {
-        moveTrailer('-x'); // Move trailer in negative x
-    }
-    if (rightkey) {
-        moveTrailer('+x'); // Move trailer in positive x
-    }
-    if (upkey) {
-        moveTrailer('+z'); // Move trailer in positive z
-    }
-    if (downkey) {
-        moveTrailer('-z'); // Move trailer in negative z
-    }
-    
+    if (!trailerAnimation) {
+        currentCamera = nextCamera;
+        if (leftkey) {
+            moveTrailer('-x'); // Move trailer in negative x
+        }
+        if (rightkey) {
+            moveTrailer('+x'); // Move trailer in positive x
+        }
+        if (upkey) {
+            moveTrailer('+z'); // Move trailer in positive z
+        }
+        if (downkey) {
+            moveTrailer('-z'); // Move trailer in negative z
+        }
+    }    
 }
 
 /////////////
@@ -651,19 +679,29 @@ function onKeyDown(e) {
 
     switch (e.keyCode) {
     case 49: // 1 key
-        currentCamera = cameraFrontal;
+        if (!trailerAnimation) {
+            nextCamera = cameraFrontal;
+        }
         break;
     case 50: // 2 key
-        currentCamera = cameraLateral;
+        if (!trailerAnimation) {
+            nextCamera = cameraLateral;
+        }
         break;
     case 51: // 3 key
-        currentCamera = cameraTop;
+        if (!trailerAnimation) {
+            nextCamera = cameraTop;
+        }
         break;
     case 52: // 4 key
-        currentCamera = cameraIsometricOrtogonal;
+        if (!trailerAnimation) {
+            nextCamera = cameraIsometricOrtogonal;
+        }
         break;
     case 53: // 5 key
-        currentCamera = cameraIsometricPerspective;
+        if (!trailerAnimation) {
+            nextCamera = cameraIsometricPerspective;
+        }
         break;
 
     case 54: // 6 key
