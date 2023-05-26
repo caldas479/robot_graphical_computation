@@ -18,9 +18,9 @@ var qkey = 0, wkey = 0, ekey = 0, rkey = 0, akey = 0, skey = 0, dkey = 0, fkey =
 var upkey = 0, downkey = 0, leftkey = 0, rightkey = 0;
 
 var trailer;
-var trailerBB, truckBB;
 var truckColision = 0;
 
+var truckBBMin, truckBBMax, trailerBBMin,trailerBBMax;
 
 ////////////////////////
 /* CREATE OBJECT3D(S) */
@@ -280,8 +280,9 @@ function createRobot() {
     var robot = new THREE.Group();
     material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
 
-    // Boundary Box for  colision
-    truckBB = new THREE.Box3(new THREE.Vector3(-3, 6, -9.55),new THREE.Vector3(3, 13.5, 1.84));
+    // Boundary Box initial points
+    truckBBMin = new THREE.Vector3(-3.5, 6, -3);
+    truckBBMax = new THREE.Vector3(3.5, 13.5, 1.5);
 
     addBody(robot);                                   //body
     addWholeHead(robot);                              //head
@@ -308,8 +309,8 @@ function addBox(group) {
     var box = new THREE.Group();
     material = new THREE.MeshBasicMaterial({ color: 0xafafaf, wireframe: true });
 
-    addCubicPart(box, 7, 6, 20, 8, 4.5, 0);                //box
-    addCouplingGear(box);                                  //couplingGear
+    addCubicPart(box, 7, 6, 20, 8, 5, 0);                //box
+    addCouplingGear(box);                                //couplingGear
     addWheel(box, 5, 1, -4.5);                           //frontLeftWheel
     addWheel(box, 5, 1, -6.5);                           //backLeftWheel
     addWheel(box, 11, 1, -4.5);                          //frontRightWheel
@@ -325,10 +326,10 @@ function createTrailer() {
 
     addBox(trailer);                                           //box
 
-    // Boundary Box that moves with trailer
-    trailerBB = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
-    trailerBB.setFromObject(trailer);
-
+    // Boundary Box initial points
+    trailerBBMin = new THREE.Vector3(-3.5, 6, -30);
+    trailerBBMax = new THREE.Vector3(3.5, 13.5, -9.75);
+    
     trailer.name = "trailer";
     trailer.position.set(-8,6,-20);
 
@@ -399,15 +400,23 @@ function moveTrailer(direction) {
 
     if (direction == '+x') {
         trailer.position.x += 0.2;
+        trailerBBMax.add(new THREE.Vector3(0.2,0,0));
+        trailerBBMin.add(new THREE.Vector3(0.2,0,0));
     }
     if (direction == '-x') {
         trailer.position.x += -0.2;
+        trailerBBMax.add(new THREE.Vector3(-0.2,0,0));
+        trailerBBMin.add(new THREE.Vector3(-0.2,0,0));
     }
     if (direction == '+z') {
         trailer.position.z += 0.2;
+        trailerBBMax.add(new THREE.Vector3(0,0,0.2));
+        trailerBBMin.add(new THREE.Vector3(0,0,0.2));
     }
     if (direction == '-z') {
         trailer.position.z += -0.2;
+        trailerBBMax.add(new THREE.Vector3(0,0,-0.2));
+        trailerBBMin.add(new THREE.Vector3(0,0,-0.2));
     }
 }
 
@@ -481,14 +490,20 @@ function createCameras() {
 //////////////////////
 function checkCollisions(){
     'use strict';
-
     // Check if robot is in truck mode
     if(feetRotation >= Math.PI/2 && legsRotation >= Math.PI/2 && 
-        headRotation <= -Math.PI && armLateralMov >= 1 && trailerBB.intersectsBox(truckBB)){
+        headRotation <= -Math.PI && armLateralMov >= 1){
+            if(truckBBMax.getComponent(0) > trailerBBMin.getComponent(0) && 
+                truckBBMin.getComponent(0) < trailerBBMax.getComponent(0)&&
+                truckBBMax.getComponent(1) > trailerBBMin.getComponent(1) && 
+                truckBBMin.getComponent(1) < trailerBBMax.getComponent(1)&&
+                truckBBMax.getComponent(2) > trailerBBMin.getComponent(2) && 
+                truckBBMin.getComponent(2) < trailerBBMax.getComponent(2)){
                 truckColision = 1;
-        }
-    else {
-        truckColision = 0;
+            }
+            else {
+                truckColision = 0;
+            }
     }
 
 }
@@ -501,6 +516,9 @@ function handleCollisions(){
 
     if(truckColision) {
         trailer.position.set(-8,6,-14);
+        // Boundary Box initial points
+        trailerBBMin = new THREE.Vector3(-3.5, 6, -24);
+        trailerBBMax = new THREE.Vector3(3.5, 13.5, -3.75);
     }
 
 }
@@ -510,9 +528,6 @@ function handleCollisions(){
 ////////////
 function update(){
     'use strict';
-    
-    // Update trailerBoundingBox position
-    trailerBB.setFromObject(trailer);
 
     if(qkey && feetRotation < Math.PI/2) {
         rotateFeet(1);  // Rotate feet in the positive direction
@@ -551,7 +566,6 @@ function update(){
     if (downkey) {
         moveTrailer('-z'); // Move trailer in negative z
     }
-    
     
 }
 
