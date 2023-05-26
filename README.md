@@ -44,7 +44,7 @@ The following technologies and tools were used in this project:
 
 ## Installation
 
-1. Clone the project repository: `git clone (https://github.com/caldas479/robot_graphical_computation/tree/master)`
+1. Clone the project repository: `git clone https://github.com/caldas479/robot_graphical_computation´
 
 ## Usage
 
