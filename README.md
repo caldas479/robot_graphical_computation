@@ -9,16 +9,8 @@ This project aims to develop an interactive graphics application that encompasse
 5. Implement basic animation techniques to bring objects to life.
 6. Comprehend and incorporate simple collision detection techniques.
 
-## Table of Contents
-
-- [Project Overview](#project-overview)
-- [Technologies Used](#technologies-used)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Features](#features)
-- [Contributing](#contributing)
-- [License](#license)
-
+## Robot Image
+![alt text](image.png) ![alt text](image-1.png)
 ## Project Overview
 
 The objective of this project is to develop an interactive graphics application that encompasses several fundamental concepts and techniques. The key aspects covered in this project include:
